@@ -44,6 +44,7 @@ class MySqlConn:
         except Exception as e:
             if conn:
                 conn.rollback()
+            raise
 
         finally:
             if cursor:

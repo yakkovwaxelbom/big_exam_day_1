@@ -1,4 +1,4 @@
-from connection.connection_manager import ConnectionsManager, KafkaConsumerConnection
+from connection.connection_manager import ConnectionsManager, KafkaConsumerConnection, MySqlConn
 from config.logger import log_event
 from dal import MySqlDal
 from models import IntelSignal
@@ -17,18 +17,17 @@ class IntelConsumer:
             data = IntelSignal(**data)
 
             if self._dal.intel_entity_lot_lan_timestep_exists(data.entity_id,
-                                                              data.timestamp,
+                                                              data.reported_lat,
                                                               data.reported_lon,
-                                                              data.reported_lat):
+                                                              data.timestamp):
                 
                 raise MsgError(f'There is a conflict. A report already' 
                                f'exists at {data.timestamp} but the location is different.')
-
+            
             if not self._dal.intel_entity_exists(data.entity_id):
-                data.entity_id = 0
+                data.priority_level = 99
             
             self._dal.insert_into_intel_signals(**data.model_dump())
-
 
             first_timestep_to_update = \
                 self._dal.get_one_timestamp_of_entity_before_time_given_timestamp(
@@ -51,13 +50,14 @@ class IntelConsumer:
                 self._dal.set_distance_speed_entity_by_entity_id_timestep(current['entity_id'], current['timestamp'], distance, speed)
 
         except Exception as e:
+            print(e)
             raise MsgError(str(e))
 
 
 def main():
 
     kafka_consumer: KafkaConsumerConnection = ConnectionsManager.get_connection('kafka_consumer')
-    my_sql = ConnectionsManager.get_connection('mysql')
+    my_sql: MySqlConn = ConnectionsManager.get_connection('mysql')
 
     dal = MySqlDal(my_sql)
     consumer = IntelConsumer(dal)
@@ -67,13 +67,7 @@ def main():
 
     kafka_consumer.start_event_loop()
 
-
-   
-
-
+ 
 if __name__ == '__main__':
     main()
 
-from datetime import datetime
-
-a = (datetime(2026, 3, 16, 7, 49, 43, 430306) - datetime(2026, 3, 16, 7, 49, 43, 430306))

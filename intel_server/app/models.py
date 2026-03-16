@@ -9,5 +9,5 @@ class IntelSignal(BaseModel):
     reported_lon: float
     signal_type: str = 'unknown'
     priority_level: int
-    speed: int = -1
-    distance: int = -1
+    speed: int = 0
+    distance: int = 0

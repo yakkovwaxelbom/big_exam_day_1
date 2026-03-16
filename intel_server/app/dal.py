@@ -15,7 +15,7 @@ class MySqlDal:
         LIMIT 1
         """
 
-        result = None
+        # result = None
 
         with self._client.cursor() as cursor:
 
@@ -29,14 +29,15 @@ class MySqlDal:
         query = """
             SELECT 1
             FROM intel_signals
-            WHERE entity_id = %s AND reported_lat = %s AND reported_lon = %s AND timestep = %s
+            WHERE entity_id = %s AND reported_lat = %s AND reported_lon = %s AND timestamp = %s
             LIMIT 1
         """
-        result = None
 
         with self._client.cursor() as cursor:
             cursor.execute(query, (entity_id, lat, lon, timestep))
             result = cursor.fetchone()
+
+            print(result)
 
         return result
 
@@ -51,7 +52,7 @@ class MySqlDal:
         ORDER BY timestamp
         """
 
-        results = []
+        # results = []
 
         with self._client.cursor() as cursor:
 
@@ -62,23 +63,19 @@ class MySqlDal:
     
 
     def get_one_timestamp_of_entity_before_time_given_timestamp(self, entity_id, timestamp):
+
         query = """
-        SELECT MAX(timestamp)
+        SELECT MAX(timestamp) as timestamp
         FROM intel_signals
         WHERE entity_id = %s AND timestamp < %s
         """
-
-        result = None
 
         with self._client.cursor() as cursor:
             cursor.execute(query, (entity_id, timestamp))
             result = cursor.fetchone()
 
-        if result and result[0]:
-            return result[0]
-        
-        return timestamp
-    
+        return result.get('timestamp') or timestamp
+            
     
     def set_distance_speed_entity_by_entity_id_timestep(self, entity_id, timestamp,
                                                         distance, speed):
@@ -119,8 +116,6 @@ class MySqlDal:
                                    speed, 
                                    distance))
             
-            result = cursor.rowcount
-
-        return result
+        return cursor.rowcount
 
 
