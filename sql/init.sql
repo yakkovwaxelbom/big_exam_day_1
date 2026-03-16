@@ -7,6 +7,7 @@ CREATE TABLE intel_signals (
     signal_type VARCHAR(20),
     priority_level INT NOT NULL,
     distance INT NOT NULL,
+    speed INT NOT NULL,
 
     PRIMARY KEY (signal_id, timestamp, entity_id)
 );

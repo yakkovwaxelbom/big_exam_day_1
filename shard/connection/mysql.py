@@ -29,7 +29,7 @@ class MySqlConnection:
         return self._pool.get_connection()
     
     @contextmanager
-    def get_cursor(self):
+    def cursor(self):
         conn = None
         cursor = None
 
