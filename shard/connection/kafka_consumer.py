@@ -1,10 +1,11 @@
-import logging
 from confluent_kafka import Consumer, Producer, Message, KafkaError
 from typing import Dict, Callable, List
 import json
 
 
-logger = logging.getLogger(__name__)
+from config.logger import log_event
+
+logger = log_event
 
 
 class MsgError(Exception):
@@ -82,9 +83,11 @@ class KafkaConsumerConnection:
                     self._producer_errors.produce(topic=self._error_topic,
                                                   value=value,
                                                   callback=self._delivery_error_msg_report)
+                    
+                    log_event(f'ERROR: {value}')
 
         except KeyboardInterrupt:
-            logger.info('Stopping consumer"')
+            log_event('INFO: Stopping consumer"')
 
         finally:
             self._client.close()
@@ -94,10 +97,10 @@ class KafkaConsumerConnection:
         if e := msg.error():
 
             if e.code() == KafkaError.UNKNOWN_TOPIC_OR_PART:
-                logger.warning(f'unknown topic: {msg.topic} or part: {msg.partition}')
+                log_event(f'WARING: unknown topic: {msg.topic} or part: {msg.partition}')
          
             else:
-                logger.error('unknown error')
+                log_event(f'ERROR: unknown error {str(e)}')
 
         return e != None
     
@@ -116,9 +119,9 @@ class KafkaConsumerConnection:
 
     def _delivery_error_msg_report(err, msg: Message):
         if err:
-            logger.error(f"{msg.value().decode()} Delivery error failed: {err}")
+            log_event(f"ERROR: {msg.value().decode()} Delivery error failed: {err}")
         else:
-            logger.warning(f"Error delivered {msg.value().decode("utf-8")}")
+            log_event(f"WARING: Error delivered {msg.value().decode("utf-8")}")
 
 
 

@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings
 
-class KafkaConsumerConfig(BaseSettings):
+class MySqlConfig(BaseSettings):
     MYSQL_HOTS: str = '127.0.0.1'
     MYSQL_POR: int = 3306
     MYSQL_USR: str = 'root'
