@@ -10,4 +10,4 @@ class KafkaConsumerConfig(BaseSettings):
     def to_dict(self):
         return {
             k.replace('_', '.').lower(): v
-            for k, v in self.model_dump().items}
+            for k, v in self.model_dump().items()}
